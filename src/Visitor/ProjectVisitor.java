@@ -3,34 +3,29 @@ package Visitor;
 import AST.*;
 import AST.CSSTerms.*;
 import AST.JinjaExpressions.*;
+import AST.Statements.*;
 import grammer.lexer.ProjectParser;
 import grammer.lexer.ProjectParserBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import java.awt.print.PrinterJob;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectVisitor extends ProjectParserBaseVisitor <ASTNode> {
     @Override
     public ASTNode visitProgramDef(ProjectParser.ProgramDefContext ctx) {
-        List<ASTNode> nodes = new ArrayList<>();
+        List<Statement> statements = new ArrayList<>();
 
         for (ProjectParser.NodeContext nodeCtx : ctx.node()) {
             ASTNode node = visit(nodeCtx);
-            if (node != null) {
-                System.out.println("ADDING: " + node.getClass().getSimpleName());
-                nodes.add(node);
+
+            if (node instanceof Statement stmt) {
+                statements.add(stmt);
             }
         }
 
-        return new Program(ctx.getStart().getLine(), nodes);
-    }
-
-    @Override
-    public ASTNode visitCssCalc(ProjectParser.CssCalcContext ctx) {
-        String term = ctx.getText();
-        int line = ctx.getStart().getLine();
-        return new CSSCalc(line, term);
+        return new Program(ctx.getStart().getLine(), statements);
     }
 
     @Override
@@ -42,11 +37,22 @@ public class ProjectVisitor extends ProjectParserBaseVisitor <ASTNode> {
 
     @Override
     public ASTNode visitCssFunctionTerm(ProjectParser.CssFunctionTermContext ctx) {
-        String functionName = ctx.getText();
-        CSSValueList arguments = (CSSValueList) visit(ctx.cssFunction());
+        return visit(ctx.cssFunction());
+    }
+    @Override
+    public ASTNode visitFunction(ProjectParser.FunctionContext ctx) {
         int line = ctx.getStart().getLine();
+
+        String functionName = ctx.IDENTIFIER_CSS().getText();
+
+        CSSValueList arguments = null;
+        if (ctx.cssValueList() != null) {
+            arguments = (CSSValueList) visit(ctx.cssValueList());
+        }
+
         return new CSSFunctionTerm(line, functionName, arguments);
     }
+
 
     @Override
     public ASTNode visitCssHslaColor(ProjectParser.CssHslaColorContext ctx) {
@@ -118,10 +124,9 @@ public class ProjectVisitor extends ProjectParserBaseVisitor <ASTNode> {
     @Override
     public ASTNode visitCssString(ProjectParser.CssStringContext ctx) {
         int line = ctx.getStart().getLine();
-        String value = ctx.getText();
+        String value = ctx.STRING_CSS().getText();
         return new CSSString(line, value);
     }
-
     @Override
     public ASTNode visitValueList(ProjectParser.ValueListContext ctx) {
         List<CSSValue> values = new ArrayList<>();
@@ -150,7 +155,6 @@ public class ProjectVisitor extends ProjectParserBaseVisitor <ASTNode> {
 
         return new JinjaBinaryExpression(line, left, right, op);
     }
-
 
     @Override
     public ASTNode visitJinjaAddExpr(ProjectParser.JinjaAddExprContext ctx){
@@ -209,10 +213,94 @@ public class ProjectVisitor extends ProjectParserBaseVisitor <ASTNode> {
         String value = raw.substring(1, raw.length() - 1);
         return new JinjaString(line, value);
     }
+    @Override
+    public ASTNode visitTextNode(ProjectParser.TextNodeContext ctx) {
+        int line = ctx.getStart().getLine();
+        String text = ctx.HTML_TEXT().getText();
+        return new TextStatement(line, text);
+    }
+    @Override
+    public ASTNode visitVariable(ProjectParser.VariableContext ctx) {
+        int line = ctx.getStart().getLine();
+        JinjaExpression expr = (JinjaExpression) visit(ctx.jinjaExpression());
+        return new JinjaVariableStatement(line, expr);
+    }
+    @Override
+    public ASTNode visitJinjaForStatement(ProjectParser.JinjaForStatementContext ctx) {
+        int line = ctx.getStart().getLine();
 
+        String variable = ctx.IDENTIFIER_JINJA().getText();
+        JinjaExpression iterable =
+                (JinjaExpression) visit(ctx.jinjaExpression());
 
+        List<Statement> body = new ArrayList<>();
+        for (ProjectParser.NodeContext nodeCtx : ctx.node()) {
+            ASTNode node = visit(nodeCtx);
+            if (node instanceof Statement stmt) {
+                body.add(stmt);
+            }
+        }
 
+        return new JinjaForStatement(line, variable, iterable, body);
+    }
+    @Override
+    public ASTNode visitJinjaIfStatement(ProjectParser.JinjaIfStatementContext ctx) {
+        int line = ctx.getStart().getLine();
 
+        JinjaExpression condition =
+                (JinjaExpression) visit(ctx.jinjaExpression());
+        List<Statement> thenBody = new ArrayList<>();
+        for (ProjectParser.NodeContext nodeCtx : ctx.node()) {
+            ASTNode node = visit(nodeCtx);
+            if (node instanceof Statement stmt) {
+                thenBody.add(stmt);
+            }
+        }
+        List<JinjaElifStatement> elifBlocks = new ArrayList<>();
+        for (ProjectParser.ElifBlockContext elifCtx : ctx.elifBlock()) {
+            JinjaElifStatement elif =
+                    (JinjaElifStatement) visit(elifCtx);
+            elifBlocks.add(elif);
+        }
+        JinjaElseStatement elseBlock = null;
+        if (ctx.elseBlock() != null) {
+            elseBlock = (JinjaElseStatement) visit(ctx.elseBlock());
+        }
 
+        return new JinjaIfStatement(
+                line,elseBlock,elifBlocks,thenBody,condition
+        );
+    }
+    @Override
+    public ASTNode visitJinjaElifBlock(ProjectParser.JinjaElifBlockContext ctx) {
+        int line = ctx.getStart().getLine();
+
+        JinjaExpression condition =
+                (JinjaExpression) visit(ctx.jinjaExpression());
+
+        List<Statement> body = new ArrayList<>();
+        for (ProjectParser.NodeContext nodeCtx : ctx.node()) {
+            ASTNode node = visit(nodeCtx);
+            if (node instanceof Statement stmt) {
+                body.add(stmt);
+            }
+        }
+
+        return new JinjaElifStatement(line, condition, body);
+    }
+    @Override
+    public ASTNode visitJinjaElseBlock(ProjectParser.JinjaElseBlockContext ctx) {
+        int line = ctx.getStart().getLine();
+
+        List<Statement> body = new ArrayList<>();
+        for (ProjectParser.NodeContext nodeCtx : ctx.node()) {
+            ASTNode node = visit(nodeCtx);
+            if (node instanceof Statement stmt) {
+                body.add(stmt);
+            }
+        }
+
+        return new JinjaElseStatement(line, body);
+    }
 
 }

@@ -11,7 +11,6 @@ public class CSSString extends CSSTerm {
     @Override
     public String toString(){
         if (value == null) return "\"\"";
-        // CSS strings are typically wrapped in quotes
         return "\"" + value + "\"";
     }
     @Override

@@ -1,40 +1,33 @@
+import AST.Program;
+import Visitor.ProjectVisitor;
+import grammer.lexer.ProjectLexer;
+import grammer.lexer.ProjectParser;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
-import grammer.lexer.ProjectLexer;
-import grammer.lexer.ProjectParser;
-import Visitor.ProjectVisitor;
-import AST.ASTNode;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import java.io.IOException;
+
+import static org.antlr.v4.runtime.CharStreams.fromFileName;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        try{
+            String path = "test1.txt";
+            CharStream input =fromFileName(path);
+            ProjectLexer  lexer = new ProjectLexer(input);
+            CommonTokenStream token = new CommonTokenStream(lexer);
+            ProjectParser parser = new ProjectParser(token);
+            ParseTree tree= parser.program();
+            ProjectVisitor visitor = new ProjectVisitor();
+            Program program = (Program) visitor.visit(tree);
+            System.out.println("=== AST ===");
+            System.out.println(program);
 
-        String input = """
-        <style>
-          div {
-            width: calc(100% - 20px);
-          }
-        </style>
-        """;
-
-        // 1. Create lexer
-        CharStream charStream = CharStreams.fromString(input);
-        ProjectLexer lexer = new ProjectLexer(charStream);
-
-        // 2. Create token stream
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-        // 3. Create parser
-        ProjectParser parser = new ProjectParser(tokens);
-
-        // 4. Parse starting rule
-        ParseTree tree = parser.program();
-
-        // 5. Visit parse tree (THIS runs visitCssCalc)
-        ProjectVisitor visitor = new ProjectVisitor();
-        ASTNode ast = visitor.visit(tree);
-
-        // 6. Print AST
-        System.out.println(ast.prettyPrint(0));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

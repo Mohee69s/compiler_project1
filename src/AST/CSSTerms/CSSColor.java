@@ -11,7 +11,7 @@ public class CSSColor extends CSSTerm {
     @Override
     public String toString() {
         if (value == null) return "";
-        return value; // Named colors like "red", "blue" shouldn't be quoted
+        return value;
     }
     @Override
     public String prettyPrint(int level) {

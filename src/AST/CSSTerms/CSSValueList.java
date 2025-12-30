@@ -6,7 +6,7 @@ import AST.CSSValue;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CSSValueList extends ASTNode {
+public class CSSValueList extends CSSValue {
     public List<CSSValue> values;
     public CSSValueList(int line, List<CSSValue> values) {
         super(line, "CSSValueList");

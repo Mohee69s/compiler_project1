@@ -4,23 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Program extends ASTNode {
-    public final List<ASTNode> nodes;
-    
-    public Program(int line, List<ASTNode> nodes) {
+    public final List<Statement> statements;
+
+    public Program(int line, List<Statement> statements) {
         super(line, "Program");
-        this.nodes = nodes != null ? nodes : new ArrayList<>();
+        this.statements = statements != null ? statements : new ArrayList<>();
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Program (line " + line + "):\n");
-        for (ASTNode node : nodes) {
-            if (node != null) {
-                sb.append(indent(1)).append(node.toString()).append("\n");
+        StringBuilder sb = new StringBuilder();
+        sb.append("Program (line ").append(line).append("):\n");
+        for (Statement stmt : statements) {
+            if (stmt != null) {
+                sb.append(indent(1))
+                        .append(stmt)
+                        .append("\n");
             }
         }
         return sb.toString();
     }
+
     @Override
     public String prettyPrint(int level) {
         StringBuilder sb = new StringBuilder();
@@ -30,13 +34,11 @@ public class Program extends ASTNode {
                 .append(line)
                 .append(")\n");
 
-        for (ASTNode node : nodes) {
-            if (node != null) {
-                sb.append(node.prettyPrint(level + 1));
+        for (Statement stmt : statements) {
+            if (stmt != null) {
+                sb.append(stmt.prettyPrint(level + 1));
             }
         }
         return sb.toString();
     }
-
 }
-
