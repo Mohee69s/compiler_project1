@@ -1,6 +1,6 @@
 package AST;
 public abstract class ASTNode {
-    protected final int line;
+    public final int line;
     protected final String nodeName;
 
     protected ASTNode(int line, String nodeName){

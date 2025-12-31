@@ -15,7 +15,7 @@ import static org.antlr.v4.runtime.CharStreams.fromFileName;
 public class Main {
     public static void main(String[] args) throws Exception {
         try{
-            String path = "test1.txt";
+            String path = "test.txt";
             CharStream input =fromFileName(path);
             ProjectLexer  lexer = new ProjectLexer(input);
             CommonTokenStream token = new CommonTokenStream(lexer);
@@ -24,7 +24,7 @@ public class Main {
             ProjectVisitor visitor = new ProjectVisitor();
             Program program = (Program) visitor.visit(tree);
             System.out.println("=== AST ===");
-            System.out.println(program);
+            System.out.println(program.prettyPrint(0));
 
         } catch (IOException e) {
             e.printStackTrace();

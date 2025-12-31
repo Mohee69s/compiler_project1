@@ -6,7 +6,7 @@ public class CSSTypeSelector extends CSSSimpleSelector {
     String elementName;
     CSSPseudoSelector pseudoSelector;
     public CSSTypeSelector(int line, String elementName, CSSPseudoSelector pseudoSelector ) {
-        super(line, CSSTypeSelector);
+        super(line, "CSSTypeSelector");
         this.elementName=elementName;
         this.pseudoSelector=pseudoSelector;
 

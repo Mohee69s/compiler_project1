@@ -7,7 +7,7 @@ import java.util.List;
 public class SelfClosingHtmlElement extends HtmlElement {
     public String tagName;
     public List<HtmlAttribute>attributes;
-    protected SelfClosingHtmlElement(int line, String tagName, List<HtmlAttribute> attributes) {
+    public SelfClosingHtmlElement(int line, String tagName, List<HtmlAttribute> attributes) {
         super(line, "SelfClosingHtmlElement");
         this.tagName=tagName;
         this.attributes=attributes;

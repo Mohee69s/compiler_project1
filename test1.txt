@@ -1,1 +1,7 @@
-{{user.name}}
+<head>
+    <title>Document</title>
+</head>
+<body>
+    testBody
+</body>
+</html>
