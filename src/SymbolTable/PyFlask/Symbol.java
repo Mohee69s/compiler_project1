@@ -1,26 +1,18 @@
 package SymbolTable.PyFlask;
 
 public class Symbol {
-    public enum SymbolType {
-        VARIABLE,
-        FUNCTION,
-        PARAMETER,
-        IMPORT,
-        LOOP_VAR,
-        BUILTIN
-    }
 
     private final String name;
-    private final SymbolType type;
-    private final int line;
-    private final String scopeName;
-    private final boolean isDefined;
+    private final SymbolKind type;
+    private final int line;           // Line where symbol is defined
+    private final String scopeName;    // Name of the scope where symbol is defined
+    private final boolean isDefined;   // Whether symbol is fully defined (for functions)
 
-    public Symbol(String name, SymbolType type, int line, String scopeName) {
+    public Symbol(String name, SymbolKind type, int line, String scopeName) {
         this(name, type, line, scopeName, true);
     }
 
-    public Symbol(String name, SymbolType type, int line, String scopeName, boolean isDefined) {
+    public Symbol(String name, SymbolKind type, int line, String scopeName, boolean isDefined) {
         this.name = name;
         this.type = type;
         this.line = line;
@@ -32,7 +24,7 @@ public class Symbol {
         return name;
     }
 
-    public SymbolType getType() {
+    public SymbolKind getType() {
         return type;
     }
 
@@ -50,7 +42,7 @@ public class Symbol {
 
     @Override
     public String toString() {
-        return String.format("Symbol{name='%s', type=%s, line=%d, scope='%s'}", 
+        return String.format("Symbol{name='%s', type=%s, line=%d, scope='%s'}",
                 name, type, line, scopeName);
     }
 
@@ -67,4 +59,3 @@ public class Symbol {
         return name.hashCode() * 31 + type.hashCode();
     }
 }
-

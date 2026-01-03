@@ -26,7 +26,7 @@ public class Main {
             ProjectVisitor visitor = new ProjectVisitor();
             Program program = (Program) visitor.visit(tree);
             System.out.println(program.prettyPrint(0));
-            System.out.println("\n=== Building Symbol Table ===");
+            System.out.println("\n=== Buildinbg Symbol Table ===");
             SymbolTableBuilder symbolTableBuilder = new SymbolTableBuilder();
             symbolTableBuilder.build(program);
             symbolTableBuilder.printStatistics();
@@ -38,13 +38,23 @@ public class Main {
             CharStream input = fromFileName(path);
             PythonLexer lexer = new PythonLexer(input);
             CommonTokenStream token = new CommonTokenStream(lexer);
+
             PythonParser parser = new PythonParser(token);
             ParseTree tree = parser.prog();
-            PythonVisitor visitor = new PythonVisitor();
-            Program program2 =(Program) visitor.visit(tree);
-            System.out.println(program2.prettyPrint(0));
+            PythonVisitor programVisitor = new PythonVisitor();
+            Program ast = (Program) programVisitor.visit(tree);
 
-            } catch (IOException e) {
+            System.out.println(ast);
+
+            // Build symbol table
+            SymbolTable.PyFlask.SymbolTableBuilder symbolTableBuilder = new SymbolTable.PyFlask.SymbolTableBuilder();
+            symbolTableBuilder.visit(ast);
+
+            // Print symbol table
+            System.out.println("symbol table");
+            System.out.println("\n" + symbolTableBuilder.getSymbolTable().toString());
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

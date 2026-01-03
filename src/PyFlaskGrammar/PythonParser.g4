@@ -19,31 +19,38 @@ stat
     | forStat
     | whileStat
     | funcDef
+    | classDef
     | returnStat
+    | breakStat
+    | continueStat
     | importStat
     | exprStat
     | arrayAssignStat
     | NEWLINE
     ;
 
-// print
 printStat
     : PRINT LPARENS expr RPARENS NEWLINE?              # PrintStatement
     ;
 
-// assignment
 assignStat
     : VAR? ID ASSIGN expr NEWLINE?                     # Assignment
     ;
 
-// standalone expression
 exprStat
     : expr NEWLINE?
     ;
 
-// return
 returnStat
-    : RETURN expr NEWLINE?                             # ReturnStatement
+    : RETURN expr (COMMA NUMBER)? NEWLINE?                             # ReturnStatement
+    ;
+
+breakStat
+    : BREAK NEWLINE?                                   # BreakStatement
+    ;
+
+continueStat
+    : CONTINUE NEWLINE?                                # ContinueStatement
     ;
 
 arrayAssignStat
@@ -53,13 +60,12 @@ arrayAssignStat
 // IMPORTS
 // -------------------------------------------------
 importStat
-    : IMPORT dottedName (COMMA dottedName)* NEWLINE #ImportModule
-    | FROM dottedName IMPORT ID (COMMA ID)* NEWLINE #ImportFrom
-    ;
+        :IMPORT dottedName (COMMA dottedName)* NEWLINE #ImportModule
+        | FROM dottedName IMPORT ID (COMMA ID)* NEWLINE #ImportFrom
+;
 
-dottedName
-    : ID (DOT ID)*
-    ;
+dottedName : ID (DOT ID)* ;
+
 
 // -------------------------------------------------
 // FUNCTIONS
@@ -72,6 +78,10 @@ paramList
     : ID (COMMA ID)*               # ParameterList
     ;
 
+classDef
+    : CLASS ID (LPARENS ID RPARENS)? COLON NEWLINE block
+      # ClassDefinition
+    ;
 decorator
     : AT dottedName LPARENS argList? RPARENS NEWLINE       # DecoratorWithArgs
     | AT dottedName NEWLINE                                # DecoratorNoArgs
@@ -81,7 +91,7 @@ decorator
 // CONTROL FLOW
 // -------------------------------------------------
 ifStat
-    : IF expr COLON NEWLINE block (ELSE NEWLINE block)?
+    : IF expr COLON NEWLINE block (NEWLINE* ELSE COLON? NEWLINE block)?
     ;
 
 forStat
@@ -100,13 +110,15 @@ block
 // EXPRESSIONS
 // -------------------------------------------------
 expr
-    : expr op=(MUL|DIV) expr                     # MultDivExpr
+    : expr op=(OR|AND) expr                      # LogicalExpr
+    | expr op=(MUL|DIV) expr                     # MultDivExpr
     | expr op=(ADD|SUB) expr                     # AddSubExpr
     | expr op=(LT|GT|GE|LE|EQ|NE) expr           # ComparisonExpr
     | expr ASSIGN expr                           # KeyValue
-    | expr LSB expr RSB                          # IndexExprz
+    | expr LSB expr RSB                          # IndexExpr
+    | LPARENS ID FOR ID IN expr (IF expr)? RPARENS # GeneratorExpression
     | ID LPARENS argList? RPARENS                # FunctionCallExpr
-    | expr DOT ID                                # AttributeExpr
+    | expr DOT expr                              # AttributeExpr
     | LSB argList? RSB                           # ArrayLiteral
     | LPARENS expr RPARENS                       # ParenExpr
     | LBK dictBody? RBK                          # DictLiteral
@@ -114,7 +126,7 @@ expr
     | STRING                                     # StringLiteral
     | BOOL                                       # BooleanLiteral
     | ID                                         # IdentifierExpr
-    ;
+;
 
 dictBody: NEWLINE* pair (NEWLINE* ',' NEWLINE* pair)* NEWLINE*;
 
@@ -122,4 +134,4 @@ pair: STRING COLON expr;
 
 
 argList : (arg (COMMA arg)*)?;
-arg : expr | ID ASSIGN expr;
+arg : NEWLINE* expr NEWLINE* | ID ASSIGN expr ;

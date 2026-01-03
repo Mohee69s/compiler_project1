@@ -2,13 +2,13 @@ package AST.PyFlask.Expressions;
 
 import AST.PyFlask.Expression;
 
-public class BinaryExpr extends Expression {
+public class LogicalExpr extends Expression {
     public Expression left;
     public String op;
     public Expression right;
 
-    public BinaryExpr(int line, Expression left, String op, Expression right) {
-        super(line, "BinaryExpr");
+    public LogicalExpr(int line, Expression left, String op, Expression right) {
+        super(line, "LogicalExpr");
         this.left = left;
         this.op = op;
         this.right = right;

@@ -50,6 +50,20 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReturnStatement(PythonParser.ReturnStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code BreakStatement}
+	 * labeled alternative in {@link PythonParser#breakStat}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBreakStatement(PythonParser.BreakStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ContinueStatement}
+	 * labeled alternative in {@link PythonParser#continueStat}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitContinueStatement(PythonParser.ContinueStatementContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code ArrayAssignment}
 	 * labeled alternative in {@link PythonParser#arrayAssignStat}.
 	 * @param ctx the parse tree
@@ -90,6 +104,13 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitParameterList(PythonParser.ParameterListContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ClassDefinition}
+	 * labeled alternative in {@link PythonParser#classDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassDefinition(PythonParser.ClassDefinitionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code DecoratorWithArgs}
 	 * labeled alternative in {@link PythonParser#decorator}.
@@ -166,12 +187,26 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAttributeExpr(PythonParser.AttributeExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code GeneratorExpression}
+	 * labeled alternative in {@link PythonParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGeneratorExpression(PythonParser.GeneratorExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code ArrayLiteral}
 	 * labeled alternative in {@link PythonParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitArrayLiteral(PythonParser.ArrayLiteralContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code IndexExpr}
+	 * labeled alternative in {@link PythonParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIndexExpr(PythonParser.IndexExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code DictLiteral}
 	 * labeled alternative in {@link PythonParser#expr}.
@@ -208,6 +243,13 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParenExpr(PythonParser.ParenExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code LogicalExpr}
+	 * labeled alternative in {@link PythonParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLogicalExpr(PythonParser.LogicalExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code AddSubExpr}
 	 * labeled alternative in {@link PythonParser#expr}.
 	 * @param ctx the parse tree
@@ -221,13 +263,6 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitNumberLiteral(PythonParser.NumberLiteralContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code IndexExprz}
-	 * labeled alternative in {@link PythonParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIndexExprz(PythonParser.IndexExprzContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#dictBody}.
 	 * @param ctx the parse tree

@@ -1,6 +1,5 @@
 package AST.PyFlask.Expressions;
 
-
 import AST.ASTNode;
 import AST.PyFlask.Expression;
 

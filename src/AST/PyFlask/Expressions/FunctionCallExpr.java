@@ -1,7 +1,5 @@
 package AST.PyFlask.Expressions;
 
-
-
 import AST.PyFlask.Expression;
 
 import java.util.List;
@@ -28,7 +26,9 @@ public class FunctionCallExpr extends Expression {
         if (!args.isEmpty()) {
             sb.append(indent(indent + 1)).append("Args:\n");
             for (Expression arg : args) {
+                if(arg != null) {
                 sb.append(arg.prettyPrint(indent + 2));
+                }
             }
         }
         return sb.toString();

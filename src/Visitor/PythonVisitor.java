@@ -1,16 +1,17 @@
 package Visitor;
 
 import AST.*;
-import AST.PyFlask.Expression;
-
+import AST.PyFlask.Block;
 import AST.PyFlask.Expressions.*;
 import AST.PyFlask.Statements.*;
-import AST.PyFlask.Block;
 
 import PyFlaskGrammar.PythonParser;
 import PyFlaskGrammar.PythonParserBaseVisitor;
+import AST.PyFlask.Expression;
+
 import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
@@ -99,12 +100,39 @@ public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitForStatement(PythonParser.ForStatementContext ctx) {
-        Expression loopVar = (Expression) visit(ctx.expr(0));  // Loop variable
-        Expression iterable = (Expression) visit(ctx.expr(1));  // Iterable expression
-        Block body = (Block) visit(ctx.block());
+            Expression loopVar = (Expression) visit(ctx.expr(0));  // Loop variable
+            Expression iterable = (Expression) visit(ctx.expr(1));  // Iterable expression
+            Block body = (Block) visit(ctx.block());
+            int line = ctx.getStart().getLine();
+
+            return new ForStmt(line, loopVar, iterable, body);
+    }
+
+    @Override
+    public ASTNode visitGeneratorExpression(PythonParser.GeneratorExpressionContext ctx) {
         int line = ctx.getStart().getLine();
 
-        return new ForStmt(line, loopVar, iterable, body);
+        IdentifierExpr yieldVar =
+                new IdentifierExpr(line, ctx.ID(0).getText());
+
+        IdentifierExpr loopVar =
+                new IdentifierExpr(line, ctx.ID(1).getText());
+
+        Expression iterable =
+                (Expression) visit(ctx.expr(0));
+
+        Expression filter = null;
+        if (ctx.expr().size() == 2) {
+            filter = (Expression) visit(ctx.expr(1));
+        }
+
+        return new GeneratorExpr(
+                line,
+                yieldVar,
+                loopVar,
+                iterable,
+                filter
+        );
     }
 
     @Override
@@ -117,6 +145,21 @@ public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
         Block body = (Block) visit(ctx.block());
         int line = ctx.getStart().getLine();
         return new FunctionDef(line, name, params, body);
+    }
+
+    @Override
+    public ASTNode visitClassDefinition(PythonParser.ClassDefinitionContext ctx) {
+        String name = ctx.ID(0).getText();
+        String superClass = null;
+
+        if (ctx.ID().size() > 1) {
+            superClass = ctx.ID(1).getText();
+        }
+
+        Block block = (Block) visit(ctx.block());
+        int line = ctx.getStart().getLine();
+
+        return new ClassDef(line, name, superClass, block.getStatements());
     }
 
     @Override
@@ -197,15 +240,15 @@ public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitAttributeExpr(PythonParser.AttributeExprContext ctx) {
-        Expression target = (Expression) visit(ctx.expr());
-        String attr = ctx.ID().getText();
+        Expression target = (Expression) visit(ctx.expr(0));
+        Expression attr = (Expression) visit(ctx.expr(1));
         int line = ctx.getStart().getLine();
 
         return new AttributeExpr(line, target, attr);
     }
 
     @Override
-    public ASTNode visitIndexExpr(PythonParser.IndexExprzContext ctx) {
+    public ASTNode visitIndexExpr(PythonParser.IndexExprContext ctx) {
         Expression target = (Expression) visit(ctx.expr(0));
         Expression index = (Expression) visit(ctx.expr(1));
         int line = ctx.getStart().getLine();
@@ -258,6 +301,14 @@ public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
         int line = ctx.getStart().getLine();
 
         return new BinaryExpr(line, left, ctx.op.getText(), right);
+    }
+
+    @Override
+    public ASTNode visitLogicalExpr(PythonParser.LogicalExprContext ctx) {
+        Expression left = (Expression) visit(ctx.expr(0));
+        Expression right = (Expression) visit(ctx.expr(1));
+        int line = ctx.getStart().getLine();
+        return new LogicalExpr(line, left, ctx.op.getText(), right);
     }
 
     @Override
